@@ -32,7 +32,7 @@
           "cachedResultName": "gpt-4o-mini"
         },
         "options": {
-          "temperature": 0.1
+          "temperature": 0
         }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
@@ -53,16 +53,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=CONTEXTO DEL PROCESO:\n- Mensaje del usuario: \"{{ $('Code un solo texto').item.json.mensajeUsuario }}\"\n\n\nINSTRUCCIONES:\n1. Si ya hay datos recopilados, ÚSALOS para continuar el proceso\n2. Si el usuario responde a una pregunta, extrae y valida esa información\n3. Avanza al siguiente paso solo si la respuesta es válida\n4. Si hay errores, pide clarificación sin avanzar\n5. Siempre responde todo los datos extraidos\n6. Si se creo numero de poliza a si no tenga\n\nPASOS DEL PROCESO:\ninicio → nombre → apellido → edad → telefono → direccion → email → condiciones_medicas → confirmacion → finalizado\n\nRESPONDEME CON UN JSON SIEMPRE",
+        "text": "=CONTEXTO DEL PROCESO:\n- Mensaje del usuario: \"{{ $('Code un solo texto').item.json.mensajeUsuario }}\"\n- Contexto: {{ $('obtener datos').first().json.datos_recopilados }}\n\nINSTRUCCIONES:\n1. Si ya hay datos recopilados, ÚSALOS para continuar el proceso\n2. Si el usuario responde a una pregunta, extrae y valida esa información\n3. Avanza al siguiente paso solo si la respuesta es válida\n4. Si hay errores, pide clarificación sin avanzar\n5. Siempre responde todo los datos extraidos\n6. Si se creo numero de poliza a si no tenga\n\nPASOS DEL PROCESO:\ninicio → nombre → apellido → edad → telefono → direccion → email → condiciones_medicas → confirmacion → finalizado\n\nRESPONDEME CON UN JSON SIEMPRE",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "Eres un asistente inteligente para alta de seguro médico. Analizas los datos extraídos de la conversación anterior\n\n## COMPORTAMIENTO INTELIGENTE:\n- Cuando pidas el nombre, no pidas el nombre completo. solo pide el nombre para que después te de el apellido\n- Si ya hay datos recopilados (ej: nombre=\"Juan\"), NO los vuelvas a pedir\n- Continúa desde el siguiente paso que falta\n- Si el usuario responde a tu pregunta, extrae y valida esa información\n- Si el usuario no te entrega bien los datos pídele que lo digite nuevamente porque el dato suministrado no es correcto\n- Si el usuario te dice que no tiene condiciones medicas, no insistas y avanza al siguiente paso\n- Cuando preguntes al usuario ¿confirma que todos los datos son correctos. antes haz un resumen de los datos que diligencio\n- Especifica al usuario que no puedes realizar alguna tarea que te pida cuando en verdad no puedes hacerla. recuerda que solo tienes 2 herramientas\n- Mantén contexto de toda la conversación\n- finalizado con éxito y se le envía un correo con el detalle\n\n## PASOS:\ninicio→nombre→apellido→edad→telefono→direccion→email→condiciones_medicas→confirmacion→finalizado\n\n## TIPO DE DATOs\n\nnombre VARCHAR(100) NOT NULL,\napellido VARCHAR(100) NOT NULL,\nedad INTEGER NOT NULL CHECK (edad >= 18 AND edad <= 80),\ntelefono VARCHAR(20) NOT NULL,\ndireccion TEXT NOT NULL,\nemail VARCHAR(255) NOT NULL,\ncondiciones_medicas TEXT\n\n\n## HERRAMIENTAS PARA QUE USES\n- validar email: usa siempre para validar el email\n- validar edad: usa siempre para validar la edad\n- create usuarios_seguros: guardar si ya el usuario confirmo todos los datos\n- Get usuarios_seguros: validar antes de guardar si ya existe. con esto evitas intentar guardar duplicados y generar errores\n\n##VALIDACIONES\n\"email\": \"Debe ser un email válido\",\n\"edad\": \"Debe estar entre 18 y 80 años\",\n\"campos_obligatorios\": \"Todos los campos son obligatorios excepto condiciones_medicas\"\n\n## RESPUESTA JSON\n{ \"respuesta\": \"Tu mensaje amigable al usuario\",\n  \"paso\": \"continuar|validar|confirmar|finalizado\",\n  \"datos_extraidos\": \"tipo json con los datos del usuario\"\n}\n\n##A TENER EN CUENTA\nen la respuesta que entregues, si en el campo \"paso\" colocas \"finalizado\" o \"finalizar\" el proceso enviara un correo electrónico con el numero de póliza\nRecuerda hacer un resume de los datos"
+          "systemMessage": "Eres un asistente inteligente para alta de seguro médico. Analizas los datos extraídos de la conversación anterior\n\n## COMPORTAMIENTO INTELIGENTE:\n- Cuando pidas el nombre, no pidas el nombre completo. solo pide el nombre para que después te de el apellido\n- Si ya hay datos recopilados (ej: nombre=\"Juan\"), NO los vuelvas a pedir\n- Continúa desde el siguiente paso que falta\n- Si el usuario responde a tu pregunta, extrae y valida esa información\n- Si el usuario no te entrega bien los datos pídele que lo digite nuevamente porque el dato suministrado no es correcto\n- Si el usuario te dice que no tiene condiciones medicas, no insistas y avanza al siguiente paso\n- Cuando preguntes al usuario ¿confirma que todos los datos son correctos. antes haz un resumen de los datos que diligencio\n- Especifica al usuario que no puedes realizar alguna tarea que te pida cuando en verdad no puedes hacerla. recuerda que solo tienes 2 herramientas\n- Mantén contexto de toda la conversación\n- finalizado con éxito y se le envía un correo con el detalle\n\n## PASOS:\ninicio→nombre→apellido→edad→telefono→direccion→email→condiciones_medicas→confirmacion→finalizado\n\n## TIPO DE DATOs\n\nnombre VARCHAR(100) NOT NULL,\napellido VARCHAR(100) NOT NULL,\nedad INTEGER NOT NULL CHECK (edad >= 18 AND edad <= 80),\ntelefono VARCHAR(20) NOT NULL,\ndireccion TEXT NOT NULL,\nemail VARCHAR(255) NOT NULL,\ncondiciones_medicas TEXT\n\n\n## HERRAMIENTAS PARA QUE USES\n- validar email: usa siempre para validar el email\n- validar edad: usa siempre para validar la edad\n- create usuarios_seguros: guardar si ya el usuario confirmo todos los datos\n- Get usuarios_seguros: validar antes de guardar si ya existe. con esto evitas intentar guardar duplicados y generar errores\n\n##VALIDACIONES\n\"email\": \"Debe ser un email válido\",\n\"edad\": \"Debe estar entre 18 y 80 años\",\n\"campos_obligatorios\": \"Todos los campos son obligatorios excepto condiciones_medicas\"\n\n## RESPUESTA JSON\n{ \"respuesta\": \"Tu mensaje amigable al usuario usando solamente y únicamente etiquetas <b>, <strong>,<i>, <em>,<u>,<s>, <strike>, <del> y \\n para saltos de linea\"\n  \"paso\": \"continuar|validar|confirmar|finalizado\",\n  \"datos_extraidos\": \"tipo json con los datos del usuario\"\n}\n\n##A TENER EN CUENTA\nen la respuesta que entregues, si en el campo \"paso\" colocas \"finalizado\" o \"finalizar\" el proceso enviara un correo electrónico con el numero de póliza\nRecuerda hacer un resume de los datos"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        172,
+        180,
         -580
       ],
       "id": "f8793a76-8e3b-4a9e-89cb-4959aa46db6f",
@@ -127,7 +127,10 @@
       "parameters": {
         "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
         "text": "={{ $json.output.parseJson().respuesta }}",
-        "additionalFields": {}
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -168,14 +171,14 @@
     },
     {
       "parameters": {
-        "jsCode": "// Generar número de póliza único\nlet numeroPoliza = \"\"+$('primero obtener datos').first().json.numero_poliza\nif (numeroPoliza) {\n  numeroPoliza = 'POL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();\n}\n\n\n// obtener datos\nconst datosUsuario = $('obtener datos').first().json.datos_recopilados;\n\nconst mensajeConfirmacion = `\n<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Confirmación de Alta - Seguro Médico</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;\">\n    <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);\">\n        \n        <!-- Header -->\n        <div style=\"background: linear-gradient(135deg, #4CAF50, #45a049); padding: 30px; text-align: center;\">\n            <h1 style=\"color: white; margin: 0; font-size: 28px; font-weight: bold;\">\n                🎉 ¡Felicidades ${datosUsuario.nombre}!\n            </h1>\n            <p style=\"color: #e8f5e8; margin: 10px 0 0 0; font-size: 16px;\">\n                Tu alta en el seguro médico ha sido completada exitosamente\n            </p>\n        </div>\n\n        <!-- Success Message -->\n        <div style=\"padding: 30px; text-align: center; background-color: #f8fff8; border-left: 4px solid #4CAF50;\">\n            <div style=\"font-size: 48px; margin-bottom: 15px;\">✅</div>\n            <h2 style=\"color: #2e7d32; margin: 0; font-size: 22px;\">\n                ¡Proceso Completado con Éxito!\n            </h2>\n        </div>\n\n        <!-- Policy Details -->\n        <div style=\"padding: 30px;\">\n            <h3 style=\"color: #333; font-size: 20px; margin: 0 0 20px 0; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;\">\n                📋 Resumen de tu Póliza\n            </h3>\n            \n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555; width: 40%;\">\n                        📄 Número de Póliza:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333; font-weight: bold; font-size: 16px;\">\n                        ${numeroPoliza}\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        👤 Titular:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.nombre} ${datosUsuario.apellido}\n                    </td>\n                </tr>\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        🎂 Edad:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.edad} años\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📞 Teléfono:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.telefono}\n                    </td>\n                </tr>\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📧 Email:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.email}\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📅 Fecha de Alta:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${new Date().toLocaleDateString('es-ES')}\n                    </td>\n                </tr>\n            </table>\n        </div>\n\n        <!-- Important Information -->\n        <div style=\"background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 0 30px 30px 30px;\">\n            <h4 style=\"color: #856404; margin: 0 0 15px 0; font-size: 18px;\">\n                📧 Información Importante\n            </h4>\n            <p style=\"margin: 0 0 10px 0; color: #856404; line-height: 1.6;\">\n                En breves minutos recibirás un email con todos los detalles de tu póliza.\n            </p>\n            <p style=\"margin: 0; color: #856404; line-height: 1.6; font-weight: bold;\">\n                🏥 Tu cobertura médica estará activa en 24 horas.\n            </p>\n        </div>\n\n        <!-- Next Steps -->\n        <div style=\"padding: 0 30px 30px 30px;\">\n            <h4 style=\"color: #333; font-size: 18px; margin: 0 0 15px 0;\">\n                📋 Próximos Pasos\n            </h4>\n            <div style=\"background-color: #f8f9fa; border-radius: 8px; padding: 20px;\">\n                <ol style=\"margin: 0; padding-left: 20px; color: #555; line-height: 1.8;\">\n                    <li>Conserva este email como comprobante</li>\n                    <li>Descarga nuestra app móvil con tu número de póliza</li>\n                    <li>En 24h recibirás tu tarjeta digital por email</li>\n                    <li>Contacta con nosotros si tienes alguna duda</li>\n                </ol>\n            </div>\n        </div>\n\n        <!-- Contact Information -->\n        <div style=\"background-color: #f8f9fa; padding: 25px 30px; border-top: 3px solid #4CAF50;\">\n            <h4 style=\"color: #333; margin: 0 0 15px 0; font-size: 18px;\">\n                📞 Información de Contacto\n            </h4>\n            <div style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 15px;\">\n                <div>\n                    <p style=\"margin: 0 0 8px 0; color: #555;\">\n                        <strong>📞 Atención al Cliente:</strong><br>\n                        +57 3128976541  --prueba\n                    </p>\n                    <p style=\"margin: 0; color: #555;\">\n                        <strong>📧 Email de Soporte:</strong><br>\n                        correoPrueba@gmail.com\n                    </p>\n                </div>\n                <div>\n                    <p style=\"margin: 0 0 8px 0; color: #555;\">\n                        <strong>🌐 Sitio Web:</strong><br>\n                        www.seguros.com\n                    </p>\n                    <p style=\"margin: 0; color: #555;\">\n                        <strong>⏰ Horario:</strong><br>\n                        Lunes a Viernes 9:00-18:00\n                    </p>\n                </div>\n            </div>\n        </div>\n\n        <!-- Footer -->\n        <div style=\"background-color: #4CAF50; padding: 25px; text-align: center;\">\n            <h3 style=\"color: white; margin: 0 0 10px 0; font-size: 24px;\">\n                ¡Gracias por confiar en nosotros! 💚\n            </h3>\n            <p style=\"color: #e8f5e8; margin: 0; font-size: 14px;\">\n                Este email ha sido generado automáticamente. Si tienes dudas, contacta con nosotros.\n            </p>\n        </div>\n        \n    </div>\n</body>\n</html>\n`;\n\nreturn {\n  chatId: $input.first().json.user_id,\n  numeroPoliza,\n  mensajeConfirmacion,\n  emailUsuario: datosUsuario\n};"
+        "jsCode": "// Generar número de póliza único\nlet numeroPoliza = \"\"+$('primero obtener datos').first().json.numero_poliza\nif (numeroPoliza) {\n  numeroPoliza = 'POL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();\n}\n\n\n// obtener datos\nconst datosUsuario = $('obtener datos').first().json.datos_recopilados;\n\nconst mensajeConfirmacion = `\n<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Confirmación de Alta - Seguro Médico</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;\">\n    <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);\">\n        \n        <!-- Header -->\n        <div style=\"background: linear-gradient(135deg, #4CAF50, #45a049); padding: 30px; text-align: center;\">\n            <h1 style=\"color: white; margin: 0; font-size: 28px; font-weight: bold;\">\n                🎉 ¡Felicidades ${datosUsuario.nombre}!\n            </h1>\n            <p style=\"color: #e8f5e8; margin: 10px 0 0 0; font-size: 16px;\">\n                Tu alta en el seguro médico ha sido completada exitosamente\n            </p>\n        </div>\n\n        <!-- Success Message -->\n        <div style=\"padding: 30px; text-align: center; background-color: #f8fff8; border-left: 4px solid #4CAF50;\">\n            <div style=\"font-size: 48px; margin-bottom: 15px;\">✅</div>\n            <h2 style=\"color: #2e7d32; margin: 0; font-size: 22px;\">\n                ¡Proceso Completado con Éxito!\n            </h2>\n        </div>\n\n        <!-- Policy Details -->\n        <div style=\"padding: 30px;\">\n            <h3 style=\"color: #333; font-size: 20px; margin: 0 0 20px 0; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;\">\n                📋 Resumen de tu Póliza\n            </h3>\n            \n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555; width: 40%;\">\n                        📄 Número de Póliza:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333; font-weight: bold; font-size: 16px;\">\n                        ${numeroPoliza}\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        👤 Titular:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.nombre} ${datosUsuario.apellido}\n                    </td>\n                </tr>\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        🎂 Edad:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.edad} años\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📞 Teléfono:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.telefono}\n                    </td>\n                </tr>\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📧 Email:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.email}\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📅 Fecha de Alta:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${new Date().toLocaleDateString('es-ES')}\n                    </td>\n                </tr>\n            </table>\n        </div>\n\n        <!-- Important Information -->\n        <div style=\"background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 0 30px 30px 30px;\">\n            <h4 style=\"color: #856404; margin: 0 0 15px 0; font-size: 18px;\">\n                📧 Información Importante\n            </h4>\n            <p style=\"margin: 0 0 10px 0; color: #856404; line-height: 1.6;\">\n                En breves minutos recibirás un email con todos los detalles de tu póliza.\n            </p>\n            <p style=\"margin: 0; color: #856404; line-height: 1.6; font-weight: bold;\">\n                🏥 Tu cobertura médica estará activa en 24 horas.\n            </p>\n        </div>\n\n        <!-- Next Steps -->\n        <div style=\"padding: 0 30px 30px 30px;\">\n            <h4 style=\"color: #333; font-size: 18px; margin: 0 0 15px 0;\">\n                📋 Próximos Pasos\n            </h4>\n            <div style=\"background-color: #f8f9fa; border-radius: 8px; padding: 20px;\">\n                <ol style=\"margin: 0; padding-left: 20px; color: #555; line-height: 1.8;\">\n                    <li>Conserva este email como comprobante</li>\n                    <li>Descarga nuestra app móvil con tu número de póliza</li>\n                    <li>En 24h recibirás tu tarjeta digital por email</li>\n                    <li>Contacta con nosotros si tienes alguna duda</li>\n                </ol>\n            </div>\n        </div>\n\n        <!-- Contact Information -->\n        <div style=\"background-color: #f8f9fa; padding: 25px 30px; border-top: 3px solid #4CAF50;\">\n            <h4 style=\"color: #333; margin: 0 0 15px 0; font-size: 18px;\">\n                📞 Información de Contacto\n            </h4>\n            <div style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 15px;\">\n                <div>\n                    <p style=\"margin: 0 0 8px 0; color: #555;\">\n                        <strong>📞 Atención al Cliente:</strong><br>\n                        +57 3162200821\n                    </p>\n                    <p style=\"margin: 0; color: #555;\">\n                        <strong>📧 Email de Soporte:</strong><br>\n                        jbreinercastro@gmail.com\n                    </p>\n                </div>\n                <div>\n                    <p style=\"margin: 0 0 8px 0; color: #555;\">\n                        <strong>🌐 Sitio Web:</strong><br>\n                        www.seguros.com\n                    </p>\n                    <p style=\"margin: 0; color: #555;\">\n                        <strong>⏰ Horario:</strong><br>\n                        Lunes a Viernes 9:00-18:00\n                    </p>\n                </div>\n            </div>\n        </div>\n\n        <!-- Footer -->\n        <div style=\"background-color: #4CAF50; padding: 25px; text-align: center;\">\n            <h3 style=\"color: white; margin: 0 0 10px 0; font-size: 24px;\">\n                ¡Gracias por confiar en nosotros! 💚\n            </h3>\n            <p style=\"color: #e8f5e8; margin: 0; font-size: 14px;\">\n                Este email ha sido generado automáticamente. Si tienes dudas, contacta con nosotros.\n            </p>\n        </div>\n        \n    </div>\n</body>\n</html>\n`;\n\nreturn {\n  chatId: $input.first().json.user_id,\n  numeroPoliza,\n  mensajeConfirmacion,\n  emailUsuario: datosUsuario\n};"
       },
       "id": "2d0535ac-40c6-4698-a46f-1cf69f275e99",
       "name": "Generar Confirmación Final",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1860,
+        2080,
         -780
       ]
     },
@@ -216,7 +219,7 @@
           "conditions": [
             {
               "keyName": "user_id",
-              "keyValue": "={{ $json.message.from.id }}"
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.from.id }}"
             }
           ]
         }
@@ -262,7 +265,7 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2080,
+        2300,
         -780
       ],
       "id": "5ff79cef-42dc-4680-a021-0f2c5583d679",
@@ -290,7 +293,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        2300,
+        2520,
         -780
       ],
       "webhookId": "724f0b7b-b58a-4221-96cf-711ecd887863",
@@ -341,7 +344,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1420,
+        1640,
         -680
       ],
       "id": "bd16d7c2-d6db-4577-ba56-40f8241ac3c0",
@@ -375,7 +378,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1200,
+        1420,
         -580
       ],
       "id": "8de9dc0d-3259-4fe8-b94a-87e7182ff319",
@@ -404,7 +407,7 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1420,
+        1640,
         -480
       ],
       "id": "fe954cef-caa8-4b13-97a5-936588a5aba2",
@@ -441,7 +444,7 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1860,
+        2080,
         -580
       ],
       "id": "c17ec85c-2d02-4b90-be6c-544a7664ce08",
@@ -469,8 +472,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        980,
-        -580
+        -20,
+        -560
       ],
       "id": "1b49532b-cca7-4434-b7a7-3870a53b7152",
       "name": "obtener datos",
@@ -494,10 +497,10 @@
           "conditions": [
             {
               "id": "dbba3853-d089-4c15-84e8-3f47365d06de",
-              "leftValue": "={{ $if($('primero obtener datos').item.json.numero_poliza == undefined,0,$('primero obtener datos').item.json.numero_poliza) }}",
-              "rightValue": 0,
+              "leftValue": "={{ $if($('primero obtener datos').item.json.numero_poliza == undefined,\"0\",$('primero obtener datos').item.json.numero_poliza) }}",
+              "rightValue": "0",
               "operator": {
-                "type": "number",
+                "type": "string",
                 "operation": "equals"
               }
             }
@@ -509,7 +512,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1640,
+        1860,
         -780
       ],
       "id": "9d5efc6a-c894-45cc-9493-0e1ebda31a9f",
@@ -659,7 +662,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1640,
+        1860,
         -580
       ],
       "id": "225dae79-1a96-4935-8e27-f2aaa1ddcfba",
@@ -715,7 +718,7 @@
       "main": [
         [
           {
-            "node": "obtener datos",
+            "node": "inicio",
             "type": "main",
             "index": 0
           }
@@ -759,7 +762,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "obtener datos",
             "type": "main",
             "index": 0
           }
@@ -822,7 +825,7 @@
       "main": [
         [
           {
-            "node": "inicio",
+            "node": "AI Agent",
             "type": "main",
             "index": 0
           }
