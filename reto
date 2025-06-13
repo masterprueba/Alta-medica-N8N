@@ -1,0 +1,27 @@
+Reto 1: Flujo en n8n para un proceso conversacional
+Objetivo
+Diseña y configura un flujo en n8n que gestione un proceso conversacional a través de un canal como WhatsApp o Telegram. Por ejemplo, podrías simular el alta de un usuario en un seguro médico, guiando la conversación con un agente de IA y almacenando los datos recopilados en una base de datos.
+Proceso detallado
+Inicio de la conversación: Configura un nodo en n8n para recibir un mensaje inicial del usuario (ej. "Hola" o "Quiero registrarme").
+Recopilación de datos: Diseña un flujo que solicite información paso a paso, como nombre, apellido, teléfono, dirección, edad, etc.
+Integración con IA: Usa un agente de IA (como Grok de xAI, ChatGPT o un modelo local) para interpretar las respuestas del usuario y guiar la conversación de forma natural.
+Almacenamiento: Guarda los datos en una base de datos, como Google Sheets, Supabase o una base SQL como PostgreSQL.
+Validaciones: Implementa chequeos para asegurar que los datos sean correctos (ej. formato de teléfono válido, edad numérica).
+Confirmación: Envía un mensaje final al usuario confirmando que el proceso ha concluido.
+
+
+Cómo empezar
+Paso 1: Instala n8n localmente o usa la versión en la nube.
+Paso 2: Configura un nodo de entrada (Webhook o similar) para el canal elegido (WhatsApp/Telegram).
+Paso 3: Conecta un nodo agente de IA.
+Paso 4: Añade nodos para almacenar datos y realizar validaciones.
+Paso 5: Prueba el flujo con mensajes simulados.
+Libertad de ejecución
+Elige el canal de comunicación que prefieras (puedes simularlo si no tienes acceso a APIs reales).
+Selecciona el agente de IA que desees y justifica tu elección.
+Decide la base de datos y las validaciones adicionales que consideres útiles.
+Personaliza el flujo conversacional: puede ser lineal o permitir al usuario saltar pasos.
+Qué buscamos
+Un flujo funcional que cumpla el objetivo.
+Creatividad en la interacción con el usuario.
+Una explicación clara de cómo llegaste a tu solución y los retos que enfrentaste.
