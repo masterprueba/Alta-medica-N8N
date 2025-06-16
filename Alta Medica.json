@@ -1,0 +1,849 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -860,
+        180
+      ],
+      "id": "fb377424-b579-4f7f-9ad7-698160cb0586",
+      "name": "Telegram Trigger",
+      "webhookId": "d4e5f6a7-8c1a-4c5b-9e2a-1f3d4e5f6a7b",
+      "credentials": {
+        "telegramApi": {
+          "id": "vFDkoakc66jpL2B0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        600,
+        400
+      ],
+      "id": "36472dae-5519-4c7c-aedc-457cf73e82b2",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "145WhwbclghvLwkm",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CONTEXTO DEL PROCESO:\n- Mensaje del usuario: \"{{ $('Code un solo texto').item.json.mensajeUsuario }}\"\n- User_id: {{ $('Telegram Trigger').item.json.message.from.id }}\n- Contexto: {{ $('obtener datos').first().json.datos_recopilados }}\n\n\nINSTRUCCIONES:\n1. Si ya hay datos recopilados, ÚSALOS para continuar el proceso\n2. Si el usuario responde a una pregunta, extrae y valida esa información\n3. Avanza al siguiente paso solo si la respuesta es válida\n4. Si hay errores, pide clarificación sin avanzar\n5. Siempre responde todo los datos extraidos\n6. Si se creo numero de poliza a si no tenga\n\nPASOS DEL PROCESO:\ninicio → nombre → apellido → edad → telefono → direccion → email → condiciones_medicas → confirmacion → finalizado\n\nRESPONDEME CON UN JSON SIEMPRE",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Eres un asistente inteligente para alta de seguro médico. Analizas los datos extraídos de la conversación anterior\n\n## COMPORTAMIENTO INTELIGENTE:\n- el usuario siempre te entrega su user_id\n- Cuando pidas el nombre, no pidas el nombre completo. solo pide el nombre para que después te de el apellido\n- Si ya hay datos recopilados (ej: nombre=\"Juan\"), NO los vuelvas a pedir\n- Continúa desde el siguiente paso que falta\n- Si el usuario responde a tu pregunta, extrae y valida esa información\n- Si el usuario no te entrega bien los datos pídele que lo digite nuevamente porque el dato suministrado no es correcto\n- Si el usuario te dice que no tiene condiciones medicas, no insistas y avanza al siguiente paso\n- Cuando preguntes al usuario ¿confirma que todos los datos son correctos. antes haz un resumen de los datos que diligencio\n- Especifica al usuario que no puedes realizar alguna tarea que te pida cuando en verdad no puedes hacerla. recuerda que solo tienes 2 herramientas\n- Mantén contexto de toda la conversación\n- finalizado con éxito y se le envía un correo con el detalle\n\n## PASOS:\ninicio→nombre→apellido→edad→telefono→direccion→email→condiciones_medicas→confirmacion→finalizado\n\n## TIPO DE DATOs\nuser_id INTEGER NOT NULL,\nnombre VARCHAR(100) NOT NULL,\napellido VARCHAR(100) NOT NULL,\nedad INTEGER NOT NULL CHECK (edad >= 18 AND edad <= 80),\ntelefono VARCHAR(20) NOT NULL,\ndireccion TEXT NOT NULL,\nemail VARCHAR(255) NOT NULL,\ncondiciones_medicas TEXT\n\n\n## HERRAMIENTAS PARA QUE USES\n- validar email: usa siempre para validar el email\n- validar edad: usa siempre para validar la edad\n- gestion usuario: usa siempre {{ $('Telegram Trigger').item.json.message.from.id }}  para todo (get, create o update)\n\n##VALIDACIONES\n\"email\": \"Debe ser un email válido\",\n\"edad\": \"Debe estar entre 18 y 80 años\",\n\"campos_obligatorios\": \"Todos los campos son obligatorios excepto condiciones_medicas\"\n\n## RESPUESTA JSON\n{ \"respuesta\": \"Tu mensaje amigable al usuario usando solamente y únicamente etiquetas <b>, <strong>,<i>, <em>,<u>,<s>, <strike>, <del> y usa \\n para saltos de línea siempre\"\n  \"paso\": \"continuar|validar|confirmar|finalizado\",\n  \"datos_extraidos\": \"tipo json con los datos del usuario\"\n}\n\n## A TENER EN CUENTA\nen la respuesta que entregues, si en el campo \"paso\" colocas \"finalizado\" o \"finalizar\" el proceso enviara un correo electrónico con el numero de póliza\nRecuerda hacer un resume de los datos"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        900,
+        180
+      ],
+      "id": "5abe1db5-0d76-4060-9063-0bf39b7cefa0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output.parseJson().respuesta }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        180
+      ],
+      "id": "5df6bb4a-b5cb-454a-8737-d1275c875773",
+      "name": "Telegram",
+      "webhookId": "60498330-361e-41e5-8845-b9f3c6b76fe0",
+      "credentials": {
+        "telegramApi": {
+          "id": "vFDkoakc66jpL2B0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        760,
+        400
+      ],
+      "id": "2a3a300c-0d13-4c6e-89df-2343fde691b6",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "dGtXw0VoEXa4yovM",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "conversaciones",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        700,
+        200
+      ],
+      "id": "055d1850-9ec7-4cab-8889-53e185c905ea",
+      "name": "obtener datos",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function dominioPermitido(email, dominiosPermitidos) {\n  const partes = email.split('@');\n  if (partes.length !== 2) return false;\n\n  const dominio = partes[1].toLowerCase();\n  return dominiosPermitidos.includes(dominio);\n}\nlet respuesta = \"\"; \n// Ejemplo de uso\nconst dominios = [\"gmail.com\", \"hotmail.com\", \"outlook.com\"];\n\nconst regexEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$/;\n\nif (regexEmail.test(query)) {\n    if (!dominioPermitido(query, dominios)) {\n     respuesta =  \"ERROR DOMINIO DE EMAIL NO PERMITIDO\";\n    }else{\n      respuesta = query;\n    }\n}else{\n    respuesta = \"ERROR EN FORMATO DE EMAIL\";\n}\n\nreturn respuesta;"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        940,
+        400
+      ],
+      "id": "586c8a9f-0e6f-46e5-b3bf-2644c8fb1454",
+      "name": "validar email"
+    },
+    {
+      "parameters": {
+        "jsCode": "let respuesta = -1;\nif (query > 17 && query < 80) {\n  respuesta = query;\n}\nreturn respuesta;\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        400
+      ],
+      "id": "9d49275e-ba9c-4ac6-9e4b-01bac3538ef3",
+      "name": "validar edad"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        40
+      ],
+      "id": "9cf72b5b-2c17-48ba-82ac-7a5d99d1b676",
+      "name": "Telegram get Audio",
+      "webhookId": "744afca1-a060-4cc4-9f31-0931245a11b8",
+      "credentials": {
+        "telegramApi": {
+          "id": "vFDkoakc66jpL2B0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -200,
+        40
+      ],
+      "id": "ee8a15d2-fb49-4129-8248-211df6f113b1",
+      "name": "OpenAI audio a texto",
+      "credentials": {
+        "openAiApi": {
+          "id": "145WhwbclghvLwkm",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet mensajeUsuario;\nfor (const item of $input.all()) {\n  if ($('Telegram Trigger').first().json.message.text== null) {\n    mensajeUsuario = $input.first().json.text;\n  }else{\n    mensajeUsuario = $('Telegram Trigger').first().json.message.text;  \n  }\n  \n}\n\nreturn {\"mensajeUsuario\":mensajeUsuario};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20,
+        200
+      ],
+      "id": "83ec846a-4243-4053-8626-a76a48359e54",
+      "name": "Code un solo texto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "87a7d4e2-6aa0-4064-9c08-3becf2d901d7",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -640,
+        180
+      ],
+      "id": "9ded4e8a-cd23-4fae-a20a-46d540830905",
+      "name": "No es texto"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://xxpaolaxx.app.n8n.cloud/mcp/0cf640b5-d110-4de8-8d99-f0d516d4b4dc/sse"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        400
+      ],
+      "id": "439fc569-02fb-4862-b023-c07397f38ea2",
+      "name": "Gestion usuario"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generar número de póliza único\nlet numeroPoliza = \"\"+$('primero obtener datos').first().json.numero_poliza\nif (numeroPoliza) {\n  numeroPoliza = 'POL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();\n}\n\n\n// obtener datos\nconst datosUsuario = $('obtener datos').first().json.datos_recopilados;\n\nconst mensajeConfirmacion = `\n<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Confirmación de Alta - Seguro Médico</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;\">\n    <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);\">\n        \n        <!-- Header -->\n        <div style=\"background: linear-gradient(135deg, #4CAF50, #45a049); padding: 30px; text-align: center;\">\n            <h1 style=\"color: white; margin: 0; font-size: 28px; font-weight: bold;\">\n                🎉 ¡Felicidades ${datosUsuario.nombre}!\n            </h1>\n            <p style=\"color: #e8f5e8; margin: 10px 0 0 0; font-size: 16px;\">\n                Tu alta en el seguro médico ha sido completada exitosamente\n            </p>\n        </div>\n\n        <!-- Success Message -->\n        <div style=\"padding: 30px; text-align: center; background-color: #f8fff8; border-left: 4px solid #4CAF50;\">\n            <div style=\"font-size: 48px; margin-bottom: 15px;\">✅</div>\n            <h2 style=\"color: #2e7d32; margin: 0; font-size: 22px;\">\n                ¡Proceso Completado con Éxito!\n            </h2>\n        </div>\n\n        <!-- Policy Details -->\n        <div style=\"padding: 30px;\">\n            <h3 style=\"color: #333; font-size: 20px; margin: 0 0 20px 0; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;\">\n                📋 Resumen de tu Póliza\n            </h3>\n            \n            <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555; width: 40%;\">\n                        📄 Número de Póliza:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333; font-weight: bold; font-size: 16px;\">\n                        ${numeroPoliza}\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        👤 Titular:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.nombre} ${datosUsuario.apellido}\n                    </td>\n                </tr>\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        🎂 Edad:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.edad} años\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📞 Teléfono:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.telefono}\n                    </td>\n                </tr>\n                <tr style=\"background-color: #f9f9f9;\">\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📧 Email:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${datosUsuario.email}\n                    </td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #555;\">\n                        📅 Fecha de Alta:\n                    </td>\n                    <td style=\"padding: 12px; border: 1px solid #ddd; color: #333;\">\n                        ${new Date().toLocaleDateString('es-ES')}\n                    </td>\n                </tr>\n            </table>\n        </div>\n\n        <!-- Important Information -->\n        <div style=\"background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 0 30px 30px 30px;\">\n            <h4 style=\"color: #856404; margin: 0 0 15px 0; font-size: 18px;\">\n                📧 Información Importante\n            </h4>\n            <p style=\"margin: 0 0 10px 0; color: #856404; line-height: 1.6;\">\n                En breves minutos recibirás un email con todos los detalles de tu póliza.\n            </p>\n            <p style=\"margin: 0; color: #856404; line-height: 1.6; font-weight: bold;\">\n                🏥 Tu cobertura médica estará activa en 24 horas.\n            </p>\n        </div>\n\n        <!-- Next Steps -->\n        <div style=\"padding: 0 30px 30px 30px;\">\n            <h4 style=\"color: #333; font-size: 18px; margin: 0 0 15px 0;\">\n                📋 Próximos Pasos\n            </h4>\n            <div style=\"background-color: #f8f9fa; border-radius: 8px; padding: 20px;\">\n                <ol style=\"margin: 0; padding-left: 20px; color: #555; line-height: 1.8;\">\n                    <li>Conserva este email como comprobante</li>\n                    <li>Descarga nuestra app móvil con tu número de póliza</li>\n                    <li>En 24h recibirás tu tarjeta digital por email</li>\n                    <li>Contacta con nosotros si tienes alguna duda</li>\n                </ol>\n            </div>\n        </div>\n\n        <!-- Contact Information -->\n        <div style=\"background-color: #f8f9fa; padding: 25px 30px; border-top: 3px solid #4CAF50;\">\n            <h4 style=\"color: #333; margin: 0 0 15px 0; font-size: 18px;\">\n                📞 Información de Contacto\n            </h4>\n            <div style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 15px;\">\n                <div>\n                    <p style=\"margin: 0 0 8px 0; color: #555;\">\n                        <strong>📞 Atención al Cliente:</strong><br>\n                        +57 3162200821\n                    </p>\n                    <p style=\"margin: 0; color: #555;\">\n                        <strong>📧 Email de Soporte:</strong><br>\n                        jbreinercastro@gmail.com\n                    </p>\n                </div>\n                <div>\n                    <p style=\"margin: 0 0 8px 0; color: #555;\">\n                        <strong>🌐 Sitio Web:</strong><br>\n                        www.seguros.com\n                    </p>\n                    <p style=\"margin: 0; color: #555;\">\n                        <strong>⏰ Horario:</strong><br>\n                        Lunes a Viernes 9:00-18:00\n                    </p>\n                </div>\n            </div>\n        </div>\n\n        <!-- Footer -->\n        <div style=\"background-color: #4CAF50; padding: 25px; text-align: center;\">\n            <h3 style=\"color: white; margin: 0 0 10px 0; font-size: 24px;\">\n                ¡Gracias por confiar en nosotros! 💚\n            </h3>\n            <p style=\"color: #e8f5e8; margin: 0; font-size: 14px;\">\n                Este email ha sido generado automáticamente. Si tienes dudas, contacta con nosotros.\n            </p>\n        </div>\n        \n    </div>\n</body>\n</html>\n`;\n\nreturn {\n  chatId: $input.first().json.user_id,\n  numeroPoliza,\n  mensajeConfirmacion,\n  emailUsuario: datosUsuario\n};"
+      },
+      "id": "eec38aa7-afe5-4e51-bcae-6675be230d36",
+      "name": "Generar Confirmación Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "usuarios_seguros",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{$('Telegram Trigger').first().json.message.from.id}}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "numero_poliza",
+              "fieldValue": "={{ $json.numeroPoliza }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2600,
+        0
+      ],
+      "id": "8c07368d-33ba-4751-a269-6042817fe4da",
+      "name": "actualizar usuarios_seguros",
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "✅ Confirmación de Alta - Seguro Médico",
+        "message": "={{ $('Generar Confirmación Final').item.json.mensajeConfirmacion }}",
+        "options": {
+          "bccList": "",
+          "ccList": "",
+          "replyTo": "soporte@seguros.com"
+        }
+      },
+      "id": "943d59ad-d922-45cf-a3a0-67c28c742937",
+      "name": "Enviar Email Confirmación",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2820,
+        0
+      ],
+      "webhookId": "724f0b7b-b58a-4221-96cf-711ecd887863",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LNc5seTrogZWinUW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2e99ecdc-8c17-4121-9683-c8ee2d37f143",
+              "leftValue": "={{ $('AI Agent').item.json.output.parseJson().paso }}",
+              "rightValue": "finalizar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "fd8f7d71-c8a7-4dd9-9ac6-bc8a2d00e3c6",
+              "leftValue": "={{ $('AI Agent').item.json.output.parseJson().paso }}",
+              "rightValue": "finalizado",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1940,
+        100
+      ],
+      "id": "26a17e3a-c26a-4b6b-b5f6-47927d9800cc",
+      "name": "¿paso final?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aba9e56d-71da-4270-bc73-fc76aebf0aa3",
+              "leftValue": "={{ $('obtener datos').first().json }}",
+              "rightValue": "=inicio",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1720,
+        200
+      ],
+      "id": "6603bfc9-b5e0-402a-a6a8-8244cff07520",
+      "name": "inicio"
+    },
+    {
+      "parameters": {
+        "tableId": "conversaciones",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            },
+            {
+              "fieldId": "paso_actual",
+              "fieldValue": "={{ $('AI Agent').item.json.output.parseJson().paso }}"
+            },
+            {
+              "fieldId": "datos_recopilados",
+              "fieldValue": "={{ $('AI Agent').item.json.output.parseJson().datos_extraidos }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        300
+      ],
+      "id": "47e6ad43-2709-40b6-be37-cbc3eb14be15",
+      "name": "crear datos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "conversaciones",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "datos_recopilados",
+              "fieldValue": "={{ $('AI Agent').item.json.output.parseJson().datos_extraidos }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2380,
+        200
+      ],
+      "id": "7f04ef38-d72b-43c1-bdba-01879a352354",
+      "name": "actualizar datos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dbba3853-d089-4c15-84e8-3f47365d06de",
+              "leftValue": "={{ $if($('primero obtener datos').item.json.numero_poliza == undefined,\"0\",$('primero obtener datos').item.json.numero_poliza) }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        0
+      ],
+      "id": "39d6367e-e7a4-47fb-b788-1be9e2442db8",
+      "name": "¿no tiene poliza?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "06fd8f16-b703-4737-8c56-387b6397c946",
+              "leftValue": "={{ $('AI Agent').item.json.output.parseJson().datos_extraidos }}",
+              "rightValue": "{}",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        200
+      ],
+      "id": "3eb32ab4-230c-48c7-b155-a16d7ee12f4f",
+      "name": "con datos"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios_seguros",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        240,
+        200
+      ],
+      "id": "a670faec-fd2d-4889-a0a4-88b32b1aed26",
+      "name": "primero obtener datos",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "No es texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "inicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener datos": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validar email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validar edad": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram get Audio": {
+      "main": [
+        [
+          {
+            "node": "OpenAI audio a texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI audio a texto": {
+      "main": [
+        [
+          {
+            "node": "Code un solo texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code un solo texto": {
+      "main": [
+        [
+          {
+            "node": "primero obtener datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No es texto": {
+      "main": [
+        [
+          {
+            "node": "Telegram get Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code un solo texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gestion usuario": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Confirmación Final": {
+      "main": [
+        [
+          {
+            "node": "actualizar usuarios_seguros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualizar usuarios_seguros": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email Confirmación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿paso final?": {
+      "main": [
+        [
+          {
+            "node": "¿no tiene poliza?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "con datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inicio": {
+      "main": [
+        [
+          {
+            "node": "¿paso final?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "crear datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿no tiene poliza?": {
+      "main": [
+        [
+          {
+            "node": "Generar Confirmación Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "con datos": {
+      "main": [
+        [
+          {
+            "node": "actualizar datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "primero obtener datos": {
+      "main": [
+        [
+          {
+            "node": "obtener datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30b471f5f53c438e8e7718072f35085325c0ab6e8802c2775855362a7d4248b5"
+  }
+}

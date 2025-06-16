@@ -1,0 +1,203 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "tableId": "usuarios_seguros",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `user_id del usuario`, 'string') }}"
+            },
+            {
+              "fieldId": "nombre",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Nombre digitado por el usuario`, 'string') }}"
+            },
+            {
+              "fieldId": "apellido",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Apellido digitado por el usuario`, 'string') }}"
+            },
+            {
+              "fieldId": "edad",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', `Edad digitada por el usuario`, 'string') }}"
+            },
+            {
+              "fieldId": "telefono",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', `Telefono digitado por el usuario`, 'string') }}"
+            },
+            {
+              "fieldId": "direccion",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', `Direccion digitado por el usuario`, 'string') }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', `Email digitado por el usuario`, 'string') }}"
+            },
+            {
+              "fieldId": "condiciones_medicas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues7_Field_Value', `Condicion_medica digitada por el usuario`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        140
+      ],
+      "id": "df695735-f5ba-4134-8278-cee4c845af40",
+      "name": "create usuarios_seguros",
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios_seguros",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        140
+      ],
+      "id": "b8394b92-786e-4d68-8e48-3cd0327c1235",
+      "name": "Get usuarios_seguros",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "0cf640b5-d110-4de8-8d99-f0d516d4b4dc"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -540,
+        -80
+      ],
+      "id": "0a851117-c97b-4172-bdea-9b87362db33f",
+      "name": "MCP Server Trigger",
+      "webhookId": "0cf640b5-d110-4de8-8d99-f0d516d4b4dc"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "usuarios_seguros",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', `user_id del usuario`, 'string') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nombre",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "apellido",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "edad",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "telefono",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "direccion",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', ``, 'string') }}"
+            },
+            {
+              "fieldId": "condiciones_medicas",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues6_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        140
+      ],
+      "id": "91480414-7b7e-41bd-b680-9fd670abdeeb",
+      "name": "update usuarios_seguros",
+      "credentials": {
+        "supabaseApi": {
+          "id": "FBCdtgZlNfvohdVd",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "create usuarios_seguros": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get usuarios_seguros": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update usuarios_seguros": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30b471f5f53c438e8e7718072f35085325c0ab6e8802c2775855362a7d4248b5"
+  }
+}
